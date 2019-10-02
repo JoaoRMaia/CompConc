@@ -1,13 +1,20 @@
 #include <iostream>
 #include <functional>
+
 using namespace std;
 
-#define Epsilon 10e-7
+#define Epsilon 10e-5
 
 
 template <typename A , typename B>
 double ptMed (A a, B b){
 	return (a+b)/2;
+}
+
+template<typename A>
+double Modulo( A x){
+	if ( x < 0 ) return -x;
+	else return x;
 }
 
 struct Retangulo{
@@ -23,16 +30,11 @@ struct Retangulo{
 		this->y = y(ptMed(x0,x1));
 		area = (x1-x0)*this->y;
 	}
-	template<typename F>
-	Retangulo split(F funcao){
-		
-		return *this;
-	}
+	
 	double getArea(){
 		return this->area;
 	}
-	
-	
+
 	double x0;
 	double x1;
 	double y;
@@ -58,10 +60,6 @@ double operator +(Retangulo a, double b){
 	return a.getArea()+b;
 }
 
-double Modulo( double x){
-	if ( x < 0 ) return -x;
-	else return x;
-}
 
 template <typename F>
 double Integral(double x0, double x1, F func){
@@ -75,7 +73,7 @@ double Integral(double x0, double x1, F func){
 	}
 	else {
 		soma = MenorEsq+MenorDir;
-		cout << "FIM " << soma <<endl;
+		// cout << "FIM " << soma <<endl;
 	}
 	
 	
@@ -84,11 +82,8 @@ double Integral(double x0, double x1, F func){
 
 int main () {
 	
-	Retangulo a{4,7,5};
-	Retangulo b{4,7,5};
 	
-	
-	cout << Integral(1,2,[](double x){ return x*x;	}) << endl;
+	cout << Integral(1,22,[](double x){ return x*x+1;	}) << endl;
 	
 	return 0;
 }
