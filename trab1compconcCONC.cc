@@ -2,11 +2,13 @@
 #include <functional>
 #include <pthread.h>
 
-static const double Epsilon = 10e-5;
+static const double Epsilon = 10e-5;   // Margem de erro
 
-static const int N_THREADS = 8;
+static const int N_THREADS = 8;   // Número de threads
 
 using namespace std;
+
+
 pthread_mutex_t mutex;
 double somathreads = 0;
 
@@ -63,6 +65,8 @@ struct Arg{
 	function<double(double)> func;	
 };
 
+// Redefinição de operadores + e - para somar a area dos retangulos
+
 double operator -(Retangulo a, Retangulo b){
 	return a.getArea()-b.getArea();
 }
@@ -83,6 +87,8 @@ double operator +(Retangulo a, double b){
 }
 
 
+// Função que realiza integral
+
 template <typename F>
 double Integral(double x0, double x1, F func){
 	double soma;
@@ -100,6 +106,8 @@ double Integral(double x0, double x1, F func){
 	}
 	return soma;
 }
+
+// Função que cria as threads
 
 void* IntegralAux( void* arg){
 	Arg aux = *(Arg*) arg;
@@ -128,6 +136,9 @@ void* IntegralAux( void* arg){
 	return 0;
 }
 
+
+// Função que divide a tarefa em blocos
+
 template<typename F>
 double IntegralConc(double x0, double x1, F func){
 	Arg arg[N_THREADS];
@@ -138,7 +149,7 @@ double IntegralConc(double x0, double x1, F func){
 	double incremento = (x1-x0)/N_THREADS;
 	for ( i = 0 ; i < N_THREADS ; i++){
 		arg[i] = Arg(x0+incremento*i,x0+incremento*(i+1),func);
-		cout << "Calculando de " << x0+incremento*i << " ate " << x0+incremento*(i+1) << endl;
+		//cout << "Calculando de " << x0+incremento*i << " ate " << x0+incremento*(i+1) << endl;
 		pthread_create(&tid[i],NULL,IntegralAux,(void*)&arg[i]);
 	}
 	
@@ -155,7 +166,7 @@ int main () {
 	
 	
 	
-	cout << IntegralConc(0,200,[](double x){ return x*x+1;	}) << endl;
+	cout << IntegralConc(1,1000000,[](double x){ return x*x+1;	}) << endl;   
 	
 	return 0;
 }
