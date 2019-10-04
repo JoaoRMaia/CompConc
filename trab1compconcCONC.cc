@@ -225,6 +225,8 @@ int main () {
 		case 'd': // f(x) = sen(x^2)
 			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return sin(pow(x,2));}) << endl;
 			else cout << Integral(intervalo1,intervalo2,[](double x){return sin(pow(x,2));}) << endl;
+			breal;
+			
 		case 'e': // f(x) = cos(e^-x)
 			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return cos(exp(-x));}) << endl;
 			else cout << Integral(intervalo1,intervalo2,[](double x){return cos(exp(-x));}) << endl;
@@ -242,7 +244,6 @@ int main () {
 			
 		default: 
 			cout << "Opção inválida, tente novamente" << endl << endl << "Voce escolheu: " << input << endl;
-			cin >> input;
 		
 	}
 	return 0;
