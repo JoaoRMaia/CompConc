@@ -1,10 +1,12 @@
 #include <iostream>
 #include <functional>
 #include <pthread.h>
+#include <cmath>
+#include <math.h>
 
-static const double Epsilon = 10e-5;   // Margem de erro
+static double Epsilon = 10e-5;   // Margem de erro
 
-static const int N_THREADS = 8;   // Número de threads
+static int N_THREADS = 8;   // Número de threads
 
 using namespace std;
 
@@ -12,16 +14,23 @@ using namespace std;
 pthread_mutex_t mutex;
 double somathreads = 0;
 
+// Função que retorna o ponto médio de dois pontos
+
 template <typename A , typename B>
 double ptMed (A a, B b){
 	return (a+b)/2;
 }
+
+
+// Função que retorna o modulo de um número
 
 template<typename A>
 double Modulo( A x){
 	if ( x < 0 ) return -x;
 	else return x;
 }
+
+// Struct usada para representar os retangulos usados para aproximar a integral
 
 struct Retangulo{
 	Retangulo(double x0, double x1, double y){
@@ -47,6 +56,8 @@ struct Retangulo{
 	double area;
 };
 
+// Struct usada para ser passada como argumento para a função IntegralAux
+
 struct Arg{
 	
 	Arg() {
@@ -65,7 +76,8 @@ struct Arg{
 	function<double(double)> func;	
 };
 
-// Redefinição de operadores + e - para somar a area dos retangulos
+// Redefinição de operadores + e - para somar a area dos retangulos, ou seja,
+// Se somarmamos um Retangulo A com um Retangulo B o resultado será a soma de suas áreas
 
 double operator -(Retangulo a, Retangulo b){
 	return a.getArea()-b.getArea();
@@ -107,7 +119,7 @@ double Integral(double x0, double x1, F func){
 	return soma;
 }
 
-// Função que cria as threads
+// Função que cria as threads com os blocos criados pela IntegralConc
 
 void* IntegralAux( void* arg){
 	Arg aux = *(Arg*) arg;
@@ -125,7 +137,7 @@ void* IntegralAux( void* arg){
 	}
 	else {
 		soma = MenorEsq+MenorDir;
-		cout << "FIM " << soma <<endl;
+		//cout << "FIM " << soma <<endl;
 	}
 	
 	pthread_mutex_lock(&mutex);
@@ -149,24 +161,89 @@ double IntegralConc(double x0, double x1, F func){
 	double incremento = (x1-x0)/N_THREADS;
 	for ( i = 0 ; i < N_THREADS ; i++){
 		arg[i] = Arg(x0+incremento*i,x0+incremento*(i+1),func);
-		//cout << "Calculando de " << x0+incremento*i << " ate " << x0+incremento*(i+1) << endl;
-		pthread_create(&tid[i],NULL,IntegralAux,(void*)&arg[i]);
+		cout << "Calculando de " << x0+incremento*i << " ate " << x0+incremento*(i+1) << endl;
+		pthread_create(&tid[i],0,IntegralAux,(void*)&arg[i]);
 	}
-	
 	for ( int i = 0 ; i < N_THREADS ; i++){
 		pthread_join(tid[i],0);
+		free(&tid[i]);
 	}
-	
+	pthread_mutex_destroy(&mutex);
 	return somathreads;
 }
+void printMenu(char &input) {
+	cout << "Digite a função desejada" << endl 
+	<< "\ta) f(x) = 1 + x" << endl 
+	<< "\tb) f(x) = sqrt(1 - x^2)" 	<< endl 
+	<< "\tc) f(x) = sqrt(1+x^4)" << endl 
+	<< "\td) f(x) = sen(x^2)" << endl
+	<< "\te) f(x) = cos(e^-x)" << endl
+	<< "\tf) f(x) = cos(e^-x)*x" << endl
+	<< "\tg) f(x) = cos(e^-x)*(0.005*x^3 + 1)" << endl;
+	cin >> input;
+}
 
+void getIntervalo(double& x0, double &x1) {
+	cout << "Digite o intervalo de integração" << endl;
+	cin >> x0 >> x1;
+}
 
+void selecionaPrecisao() {
+	cout << "Selecione a ordem de grandeza da precisão ex: -7 para 10e-7" << endl;
+	cin >> Epsilon;
+	Epsilon = pow(10,Epsilon);
+}
 
+void selNThreads() {
+	cout << "Usar quantas threads? (0 para sequencial)" << endl;
+	cin >> N_THREADS;
+}
 int main () {
 	
-	
-	
-	cout << IntegralConc(1,1000000,[](double x){ return x*x+1;	}) << endl;   
-	
+	char input;
+	double intervalo1,intervalo2;
+	selecionaPrecisao();
+	selNThreads();
+	getIntervalo(intervalo1,intervalo2);
+	printMenu(input);
+	switch (input){
+		case 'a':    //  f(x) = 1 + x
+			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return x+1;}) << endl;
+			else    cout << Integral(intervalo1,intervalo2,[](double x){return x+1;}) << endl;
+			break;
+			
+		case 'b':  //  f(x) = sqrt(1 - x^2)
+			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return sqrt(1-pow(x,2));}) << endl;
+			else cout << Integral(intervalo1,intervalo2,[](double x){return sqrt(1-pow(x,2));}) << endl;
+			break;
+			
+		case 'c': // f(x) = sqrt(1+x^4)
+			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return sqrt(1+pow(x,4));}) << endl;
+			else cout << Integral(intervalo1,intervalo2,[](double x){return sqrt(1+pow(x,4));}) << endl; 
+			break;
+			
+		case 'd': // f(x) = sen(x^2)
+			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return sin(pow(x,2));}) << endl;
+			else cout << Integral(intervalo1,intervalo2,[](double x){return sin(pow(x,2));}) << endl;
+		case 'e': // f(x) = cos(e^-x)
+			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return cos(exp(-x));}) << endl;
+			else cout << Integral(intervalo1,intervalo2,[](double x){return cos(exp(-x));}) << endl;
+			break;
+			
+		case 'f': // f(x) = cos(e^-x)*x
+			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return cos(exp(-x))*x;}) << endl;
+			else cout << Integral(intervalo1,intervalo2,[](double x){return cos(exp(-x))*x;}) << endl;
+			break;
+			
+		case 'g': // f(x) = cos(e^-x)*(0.005*x^3 + 1)
+			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return cos(exp(-x))*(0.005*pow(x,3)+1);}) << endl;
+			else cout << Integral(intervalo1,intervalo2,[](double x){return cos(exp(-x))*(0.005*pow(x,3)+1);}) << endl;
+			break;
+			
+		default: 
+			cout << "Opção inválida, tente novamente" << endl << endl << "Voce escolheu: " << input << endl;
+			cin >> input;
+		
+	}
 	return 0;
 }
