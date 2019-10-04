@@ -2,17 +2,15 @@
 #include <functional>
 #include <pthread.h>
 #include <cmath>
-#include <math.h>
-
-static double Epsilon = 10e-5;   // Margem de erro
-
-static int N_THREADS = 8;   // Número de threads
+#include <chrono>
 
 using namespace std;
 
+static double Epsilon;   // Margem de erro
+static int N_THREADS;   // Número de threads
 
 pthread_mutex_t mutex;
-double somathreads = 0;
+double somathreads;
 
 // Função que retorna o ponto médio de dois pontos
 
@@ -20,7 +18,6 @@ template <typename A , typename B>
 double ptMed (A a, B b){
 	return (a+b)/2;
 }
-
 
 // Função que retorna o modulo de um número
 
@@ -161,13 +158,14 @@ double IntegralConc(double x0, double x1, F func){
 	double incremento = (x1-x0)/N_THREADS;
 	for ( i = 0 ; i < N_THREADS ; i++){
 		arg[i] = Arg(x0+incremento*i,x0+incremento*(i+1),func);
-		cout << "Calculando de " << x0+incremento*i << " ate " << x0+incremento*(i+1) << endl;
+		//cout << "Calculando de " << x0+incremento*i << " ate " << x0+incremento*(i+1) << endl;
 		pthread_create(&tid[i],0,IntegralAux,(void*)&arg[i]);
 	}
 	for ( int i = 0 ; i < N_THREADS ; i++){
 		pthread_join(tid[i],0);
 		free(&tid[i]);
 	}
+	cout << "O valor da integral e de " << somathreads << "u.m." << endl;
 	pthread_mutex_destroy(&mutex);
 	return somathreads;
 }
@@ -206,45 +204,47 @@ int main () {
 	selNThreads();
 	getIntervalo(intervalo1,intervalo2);
 	printMenu(input);
+	auto ini = chrono::high_resolution_clock::now();
 	switch (input){
 		case 'a':    //  f(x) = 1 + x
-			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return x+1;}) << endl;
-			else    cout << Integral(intervalo1,intervalo2,[](double x){return x+1;}) << endl;
+			if (N_THREADS > 0 && N_THREADS < 256)  IntegralConc(intervalo1,intervalo2,[](double x){return x+1;}) ;
+			else     Integral(intervalo1,intervalo2,[](double x){return x+1;}) ;
 			break;
 			
 		case 'b':  //  f(x) = sqrt(1 - x^2)
-			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return sqrt(1-pow(x,2));}) << endl;
-			else cout << Integral(intervalo1,intervalo2,[](double x){return sqrt(1-pow(x,2));}) << endl;
+			if (N_THREADS > 0 && N_THREADS < 256)  IntegralConc(intervalo1,intervalo2,[](double x){return sqrt(1-pow(x,2));}) ;
+			else  Integral(intervalo1,intervalo2,[](double x){return sqrt(1-pow(x,2));}) ;
 			break;
 			
 		case 'c': // f(x) = sqrt(1+x^4)
-			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return sqrt(1+pow(x,4));}) << endl;
-			else cout << Integral(intervalo1,intervalo2,[](double x){return sqrt(1+pow(x,4));}) << endl; 
+			if (N_THREADS > 0 && N_THREADS < 256)  IntegralConc(intervalo1,intervalo2,[](double x){return sqrt(1+pow(x,4));}) ;
+			else  Integral(intervalo1,intervalo2,[](double x){return sqrt(1+pow(x,4));}) ; 
 			break;
 			
 		case 'd': // f(x) = sen(x^2)
-			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return sin(pow(x,2));}) << endl;
-			else cout << Integral(intervalo1,intervalo2,[](double x){return sin(pow(x,2));}) << endl;
-			breal;
-			
+			if (N_THREADS > 0 && N_THREADS < 256)  IntegralConc(intervalo1,intervalo2,[](double x){return sin(pow(x,2));}) ;
+			else  Integral(intervalo1,intervalo2,[](double x){return sin(pow(x,2));}) ;
 		case 'e': // f(x) = cos(e^-x)
-			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return cos(exp(-x));}) << endl;
-			else cout << Integral(intervalo1,intervalo2,[](double x){return cos(exp(-x));}) << endl;
+			if (N_THREADS > 0 && N_THREADS < 256)  IntegralConc(intervalo1,intervalo2,[](double x){return cos(exp(-x));}) ;
+			else  Integral(intervalo1,intervalo2,[](double x){return cos(exp(-x));}) ;
 			break;
 			
 		case 'f': // f(x) = cos(e^-x)*x
-			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return cos(exp(-x))*x;}) << endl;
-			else cout << Integral(intervalo1,intervalo2,[](double x){return cos(exp(-x))*x;}) << endl;
+			if (N_THREADS > 0 && N_THREADS < 256)  IntegralConc(intervalo1,intervalo2,[](double x){return cos(exp(-x))*x;}) ;
+			else  Integral(intervalo1,intervalo2,[](double x){return cos(exp(-x))*x;}) ;
 			break;
 			
 		case 'g': // f(x) = cos(e^-x)*(0.005*x^3 + 1)
-			if (N_THREADS > 0 && N_THREADS < 256) cout << IntegralConc(intervalo1,intervalo2,[](double x){return cos(exp(-x))*(0.005*pow(x,3)+1);}) << endl;
-			else cout << Integral(intervalo1,intervalo2,[](double x){return cos(exp(-x))*(0.005*pow(x,3)+1);}) << endl;
+			if (N_THREADS > 0 && N_THREADS < 256)  IntegralConc(intervalo1,intervalo2,[](double x){return cos(exp(-x))*(0.005*pow(x,3)+1);}) ;
+			else  Integral(intervalo1,intervalo2,[](double x){return cos(exp(-x))*(0.005*pow(x,3)+1);}) ;
 			break;
 			
 		default: 
 			cout << "Opção inválida, tente novamente" << endl << endl << "Voce escolheu: " << input << endl;
 		
 	}
+	auto fim = chrono::high_resolution_clock::now();
+	chrono::duration<double> tempo = fim - ini;
+	cout << "O tempo levado para calcular a integral foi de: " << tempo.count() <<" segundos." << endl;
 	return 0;
 }
