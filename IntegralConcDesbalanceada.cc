@@ -7,19 +7,19 @@
 using namespace std;
 
 static double Epsilon;   // Margem de erro
-static int N_THREADS;   // Número de threads
+static int N_THREADS;   // NÃºmero de threads
 
 pthread_mutex_t mutex;
 double somathreads;
 
-// Função que retorna o ponto médio de dois pontos
+// FunÃ§Ã£o que retorna o ponto mÃ©dio de dois pontos
 
 template <typename A , typename B>
 double ptMed (A a, B b){
 	return (a+b)/2;
 }
 
-// Função que retorna o modulo de um número
+// FunÃ§Ã£o que retorna o modulo de um nÃºmero
 
 template<typename A>
 double Modulo( A x){
@@ -53,7 +53,7 @@ struct Retangulo{
 	double area;
 };
 
-// Struct usada para ser passada como argumento para a função IntegralAux
+// Struct usada para ser passada como argumento para a funÃ§Ã£o IntegralAux
 
 struct Arg{
 	
@@ -73,8 +73,8 @@ struct Arg{
 	function<double(double)> func;	
 };
 
-// Redefinição de operadores + e - para somar a area dos retangulos, ou seja,
-// Se somarmamos um Retangulo A com um Retangulo B o resultado será a soma de suas áreas
+// RedefiniÃ§Ã£o de operadores + e - para somar a area dos retangulos, ou seja,
+// Se somarmamos um Retangulo A com um Retangulo B o resultado serÃ¡ a soma de suas Ã¡reas
 
 double operator -(Retangulo a, Retangulo b){
 	return a.getArea()-b.getArea();
@@ -95,7 +95,7 @@ double operator +(Retangulo a, double b){
 	return a.getArea()+b;
 }
 
-// Função que realiza integral
+// FunÃ§Ã£o que realiza integral
 
 template <typename F>
 double Integral(double x0, double x1, F func){
@@ -114,7 +114,7 @@ double Integral(double x0, double x1, F func){
 	return soma;
 }
 
-// Função que cria as threads com os blocos criados pela IntegralConc
+// FunÃ§Ã£o executada pelas threads com os blocos criados pela IntegralConc
 
 void* IntegralAux( void* arg){
 	Arg aux = *(Arg*) arg;
@@ -142,7 +142,7 @@ void* IntegralAux( void* arg){
 }
 
 
-// Função que divide a tarefa em blocos
+// FunÃ§Ã£o que cria as threads e divide a tarefa em blocos
 
 template<typename F>
 double IntegralConc(double x0, double x1, F func){
@@ -164,7 +164,7 @@ double IntegralConc(double x0, double x1, F func){
 	return somathreads;
 }
 void printMenu(char &input) {
-	cout << "Digite a função desejada" << endl 
+	cout << "Digite a funÃ§Ã£o desejada" << endl 
 	<< "\ta) f(x) = 1 + x" << endl 
 	<< "\tb) f(x) = sqrt(1 - x^2)" 	<< endl 
 	<< "\tc) f(x) = sqrt(1+x^4)" << endl 
@@ -176,12 +176,12 @@ void printMenu(char &input) {
 }
 
 void getIntervalo(double& x0, double &x1) {
-	cout << "Digite o intervalo de integração. Ex: 0 10 para integrar de 0 a 10" << endl;
+	cout << "Digite o intervalo de integraÃ§Ã£o. Ex: 0 10 para integrar de 0 a 10" << endl;
 	cin >> x0 >> x1;
 }
 
 void selecionaPrecisao() {
-	cout << "Selecione a ordem de grandeza da precisão ex: -7 para 10e-7" << endl;
+	cout << "Selecione a ordem de grandeza da precisÃ£o ex: -7 para 10e-7" << endl;
 	cin >> Epsilon;
 	Epsilon = pow(10,Epsilon);
 }
@@ -231,7 +231,7 @@ int main () {
 			break;
 			
 		default: 
-			cout << "Opção inválida, tente novamente" << endl << endl << "Voce escolheu: " << input << endl;
+			cout << "OpÃ§Ã£o invÃ¡lida, tente novamente" << endl << endl << "Voce escolheu: " << input << endl;
 		
 	}
 	auto fim = chrono::high_resolution_clock::now();
