@@ -147,7 +147,7 @@ double IntegralConc(double x0, double x1, F func){
 	pthread_mutex_init(&mutex_buffer,0);
 	double incremento = (x1-x0)/N_THREADS;
 	for ( i = 0 ; i < N_THREADS ; i++){
-		cout << "Thread " << i+1 << " irá integrar de " << x0+incremento*i << " a " << x0+incremento*(i+1) << endl;
+		cout << "Retangulo inicial de " << x0+incremento*i << " a " << x0+incremento*(i+1) << " acrescentado ao buffer."<< endl;
 		buffer.push(Retangulo{x0+incremento*i,x0+incremento*(i+1),func});
 	}
 	for ( i = 0 ; i < N_THREADS ; i++){
